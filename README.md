@@ -1,1 +1,3 @@
 # projeto_raizes_nordeste_qa
+Texto sugerido para a descrição do repositório GitHub
+Este repositório reúne os artefatos acadêmicos do projeto de Garantia da Qualidade de Software da rede fictícia Raízes do Nordeste: documento principal, planilha de métricas, cenários Gherkin, coleção e ambiente Postman, mock local, runner de compatibilidade, plano JMeter e evidências complementares. Os resultados de execução incluídos foram obtidos somente contra uma API mock local descartável; eles não comprovam o funcionamento de uma aplicação real. Newman/Postman oficial, Cucumber oficial, JMeter integral e OWASP ZAP permanecem pendentes até que haja contrato de API e ambiente de teste autorizado.

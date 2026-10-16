@@ -1,0 +1,44 @@
+RELATÓRIO DE EXECUÇÃO LOCAL — RAÍZES DO NORDESTE
+Início: 2026-10-16T12:45:08.084Z
+Fim: 2026-10-16T12:45:38.691Z
+Alvo: API mock local descartável, não é sistema real.
+
+POSTMAN COMPAT — PASS: 39/39 asserções; 18 requisições; Newman/Postman oficial: NÃO.
+  PASS HTTP 200 AUTH-01 — Login válido (43.69 ms) — 3/3 asserções
+  PASS HTTP 401 AUTH-02 — Login inválido (3.68 ms) — 3/3 asserções
+  PASS HTTP 401 AUTH-03 — Tentativa de SQL Injection no login (1.87 ms) — 3/3 asserções
+  PASS HTTP 200 CAT-01 — Consultar cardápio por unidade (1.77 ms) — 2/2 asserções
+  PASS HTTP 200 CAT-02 — Consultar estoque de produto (2.5 ms) — 2/2 asserções
+  PASS HTTP 201 ORD-01 — Criar pedido (2.38 ms) — 2/2 asserções
+  PASS HTTP 200 ORD-02 — Consultar pedido (2.33 ms) — 2/2 asserções
+  PASS HTTP 201 ORD-03 — Criar pedido independente para pagamento negado (1.89 ms) — 2/2 asserções
+  PASS HTTP 200 PAY-01 — Solicitar pagamento mock aprovado (3 ms) — 2/2 asserções
+  PASS HTTP 200 PAY-02 — Solicitar pagamento mock negado (1.48 ms) — 2/2 asserções
+  PASS HTTP 200 LGPD-01 — Consultar preferências (1.54 ms) — 2/2 asserções
+  PASS HTTP 200 LGPD-02 — Atualizar consentimentos opcionais (1.05 ms) — 2/2 asserções
+  PASS HTTP 200 LGPD-03 — Solicitar cópia dos dados (0.69 ms) — 2/2 asserções
+  PASS HTTP 202 LGPD-04 — Solicitar correção de dados (1.31 ms) — 2/2 asserções
+  PASS HTTP 202 LGPD-05 — Solicitar exclusão da conta (1.17 ms) — 2/2 asserções
+  PASS HTTP 200 LGPD-06 — Revogar consentimentos opcionais (0.91 ms) — 2/2 asserções
+  PASS HTTP 403 AUD-01 — Consultar eventos de auditoria (0.91 ms) — 2/2 asserções
+  PASS HTTP 403 AUD-02 — Relatório consolidado por unidade (1.02 ms) — 2/2 asserções
+
+CARGA — 15000 requisições; 500 clientes concorrentes; 30.44s; p95 10.39 ms; erros 0 (0%); throughput 492.73 req/s.
+  LIMITE: smoke test de 30 s no mock; não é JMeter e não substitui CT08 de 10 min.
+
+SEGURANÇA COMPLEMENTAR — 6/6 checks passaram; OWASP ZAP oficial: NÃO.
+  PASS SEC-01 — Preferências sem autenticação — HTTP 401
+  PASS SEC-02 — Pedido sem autenticação — HTTP 401
+  PASS SEC-03 — SQL injection rejeitada — HTTP 401
+  PASS SEC-04 — Cliente não acessa auditoria — HTTP 403
+  PASS SEC-05 — Cliente não acessa relatório da matriz — HTTP 403
+  PASS SEC-06 — JSON inválido retorna erro controlado — HTTP 400
+
+CENÁRIOS GHERKIN MAPEADOS
+  PASS    CT01 — Login válido no APP: HTTP 200; token presente no mock.
+  PASS    CT03 — Pedido concluído com pagamento aprovado: Pedido HTTP 201; pagamento HTTP 200; status em preparo; mock.
+  PASS    CT04 — Pagamento negado não confirma o pedido: Pedido HTTP 201; pagamento HTTP 200; status final pagamento não aprovado; mock.
+  PARCIAL CT08 — Atendimento a 500 usuários simultâneos: Mock: 500 clientes simulados, 30.44s, p95 10.39ms, erros 0%. Não atende à duração completa de 10 minutos; não é JMeter nem teste do produto.
+  PASS    CT10 — Tentativa de SQL Injection no login: HTTP 401; token ausente; sem stack trace/erro SQL no mock.
+
+INTERPRETAÇÃO: os resultados demonstram apenas que os artefatos de teste funcionam contra o mock acadêmico. Não demonstram que um produto real cumpre requisitos de qualidade.

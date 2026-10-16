@@ -1,0 +1,785 @@
+{
+  "info": {
+    "_postman_id": "d8e4c1b4-4f25-4e3f-a4f1-8c62d9d3b001",
+    "name": "Raízes do Nordeste — QA (contrato de referência/mock acadêmico)",
+    "description": "Coleção acadêmica revisada para validar cenários contra uma API de referência local descartável. As rotas definem um contrato de teste proposto, não uma API oficial da Raízes do Nordeste. A execução registrada nesta entrega usou apenas mock local; não comprova funcionamento nem segurança de sistema real. Use dados fictícios. Não aponte para produção. Para outra API, alinhe rotas, payloads e critérios ao contrato aprovado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "SUBSTITUIR_APOS_LOGIN",
+      "type": "string"
+    },
+    {
+      "key": "unitId",
+      "value": "unidade-teste-01",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "produto-teste-01",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "SUBSTITUIR_APOS_CRIAR_PEDIDO_APROVADO",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "cliente-teste-01",
+      "type": "string"
+    },
+    {
+      "key": "correlationId",
+      "value": "qa-correlation-001",
+      "type": "string"
+    },
+    {
+      "key": "orderIdDeclined",
+      "value": "SUBSTITUIR_APOS_CRIAR_PEDIDO_NEGADO",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 — Autenticação",
+      "description": "Requisições de exemplo para autenticação. Rotas e campos precisam ser validados com a API real.",
+      "item": [
+        {
+          "name": "AUTH-01 — Login válido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login"
+            },
+            "description": "Rota proposta. Envia credenciais de usuário de teste. Não use senhas reais. Ajustar payload e contrato conforme a API real.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente.qa@example.test\",\n  \"senha\": \"SenhaFicticia-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login válido retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.test(\"Login válido retorna JSON\", function () { pm.response.to.be.json; });",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Token de acesso está presente\", function () { pm.expect(data.accessToken).to.be.a(\"string\"); pm.expect(data.accessToken.length).to.be.above(10); });",
+                  "pm.collectionVariables.set(\"accessToken\", data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH-02 — Login inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login"
+            },
+            "description": "Rota proposta. Cenário negativo para verificar recusa de credenciais inválidas. Espera-se 4xx, conforme contrato a definir.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente.qa@example.test\",\n  \"senha\": \"senha-incorreta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Credenciais inválidas retornam HTTP 401\", function () { pm.expect(pm.response.code).to.eql(401); });",
+                  "pm.test(\"Resposta não expõe detalhes internos\", function () { const body = pm.response.text().toLowerCase(); pm.expect(body).to.not.include(\"stack trace\"); pm.expect(body).to.not.include(\"sql syntax\"); pm.expect(body).to.not.include(\"password\"); });",
+                  "pm.test(\"Não emite token para login inválido\", function () { pm.expect(pm.response.text()).to.not.include(\"accessToken\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH-03 — Tentativa de SQL Injection no login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"' OR 1=1--\",\n  \"senha\": \"senha-invalida\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login"
+            },
+            "description": "Cenário negativo com entrada de teste não executável contra banco real. Deve ser recusado sem detalhes internos."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Payload de injeção é recusado\", function () { pm.expect(pm.response.code).to.eql(401); });",
+                  "pm.test(\"Resposta não revela erro SQL nem stack trace\", function () { const body = pm.response.text().toLowerCase(); pm.expect(body).to.not.include(\"sql syntax\"); pm.expect(body).to.not.include(\"stack trace\"); });",
+                  "pm.test(\"Nenhum token é emitido\", function () { pm.expect(pm.response.text()).to.not.include(\"accessToken\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 — Cardápio e estoque",
+      "description": "Consulta de cardápio e estoque por unidade. Validar regras de variação local e sazonalidade.",
+      "item": [
+        {
+          "name": "CAT-01 — Consultar cardápio por unidade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/units/{{unitId}}/menu"
+            },
+            "description": "Rota proposta. Verifica consulta de cardápio específico de uma unidade, incluindo itens sazonais quando aplicável."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cardápio retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Cardápio identifica unidade e itens\", function () { pm.expect(data.unitId).to.be.a(\"string\"); pm.expect(data.items).to.be.an(\"array\"); pm.expect(data.items.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CAT-02 — Consultar estoque de produto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/units/{{unitId}}/stock?productId={{productId}}"
+            },
+            "description": "Rota proposta. Verifica disponibilidade de produto no estoque local da unidade selecionada."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Estoque retorna HTTP 200 para produto de teste\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Disponibilidade é booleana e vinculada à unidade\", function () { pm.expect(data.available).to.eql(true); pm.expect(data.unitId).to.be.a(\"string\"); pm.expect(data.productId).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 — Pedidos",
+      "description": "Fluxos propostos de criação e consulta de pedido.",
+      "item": [
+        {
+          "name": "ORD-01 — Criar pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders"
+            },
+            "description": "Rota proposta. Criar pedido com itens fictícios e unidade de teste. A resposta esperada deve trazer um identificador único e status inicial conforme contrato.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"unitId\": \"{{unitId}}\",\n  \"channel\": \"APP\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 1\n    }\n  ],\n  \"correlationId\": \"{{correlationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Criação de pedido retorna HTTP 201\", function () { pm.expect(pm.response.code).to.eql(201); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Pedido possui identificador, unidade e status inicial\", function () { pm.expect(data.orderId).to.be.a(\"string\"); pm.expect(data.unitId).to.eql(\"unidade-teste-01\"); pm.expect(data.status).to.eql(\"aguardando pagamento\"); });",
+                  "pm.collectionVariables.set(\"orderId\", data.orderId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ORD-02 — Consultar pedido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}"
+            },
+            "description": "Rota proposta. Consultar pedido criado em teste para validar status, unidade e rastreabilidade."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Pedido criado anteriormente retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Consulta retorna o identificador solicitado\", function () { pm.expect(data.orderId).to.eql(pm.variables.get(\"orderId\") || pm.collectionVariables.get(\"orderId\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ORD-03 — Criar pedido independente para pagamento negado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"unitId\": \"{{unitId}}\",\n  \"channel\": \"APP\",\n  \"items\": [{\"productId\": \"{{productId}}\", \"quantity\": 1}],\n  \"correlationId\": \"qa-correlation-declined-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders"
+            },
+            "description": "Cria outro pedido para que o cenário de recusa não tente negar um pedido já pago/aprovado."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Pedido de cenário negativo é criado com HTTP 201\", function () { pm.expect(pm.response.code).to.eql(201); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Pedido negativo começa aguardando pagamento\", function () { pm.expect(data.orderId).to.be.a(\"string\"); pm.expect(data.status).to.eql(\"aguardando pagamento\"); });",
+                  "pm.collectionVariables.set(\"orderIdDeclined\", data.orderId);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 — Pagamento simulado",
+      "description": "Cenários de aprovação e recusa em gateway mock. Não representa integração real.",
+      "item": [
+        {
+          "name": "PAY-01 — Solicitar pagamento mock aprovado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/mock"
+            },
+            "description": "Rota proposta para integração de pagamento simulada. Somente em ambiente de teste; não enviar dados reais de cartão.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"scenario\": \"approved\",\n  \"correlationId\": \"{{correlationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Pagamento aprovado retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Pagamento aprovado e pedido avança para preparo\", function () { pm.expect(data.status).to.eql(\"approved\"); pm.expect(data.orderStatus).to.eql(\"em preparo\"); pm.expect(data.paymentId).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PAY-02 — Solicitar pagamento mock negado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/mock"
+            },
+            "description": "Usa pedido independente ainda não pago. Não deve alterar pedido previamente aprovado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderIdDeclined}}\",\n  \"scenario\": \"declined\",\n  \"correlationId\": \"{{correlationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Pagamento negado retorna HTTP 200 com resultado de negócio\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Pagamento permanece negado e pedido não avança para preparo\", function () { pm.expect(data.status).to.eql(\"declined\"); pm.expect(data.orderStatus).to.eql(\"pagamento não aprovado\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 — Privacidade e LGPD",
+      "description": "Requisições conceituais para consulta, alteração e solicitações de direitos do titular.",
+      "item": [
+        {
+          "name": "LGPD-01 — Consultar preferências",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/preferences"
+            },
+            "description": "Rota proposta. Consultar preferências de consentimento do usuário autenticado."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Consulta de preferências retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Preferências opcionais têm valores booleanos\", function () { pm.expect(data.personalizacaoFidelidade).to.be.a(\"boolean\"); pm.expect(data.comunicacoesPromocionais).to.be.a(\"boolean\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LGPD-02 — Atualizar consentimentos opcionais",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/preferences"
+            },
+            "description": "Rota proposta. Enviar preferências opcionais; consentimentos devem ser granulares e revogáveis. Ajustar nomes dos campos ao contrato real.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personalizacaoFidelidade\": false,\n  \"comunicacoesPromocionais\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Atualização retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Preferências enviadas são persistidas na resposta\", function () { pm.expect(data.personalizacaoFidelidade).to.eql(false); pm.expect(data.comunicacoesPromocionais).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LGPD-03 — Solicitar cópia dos dados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/data"
+            },
+            "description": "Rota proposta. Exemplo de solicitação de consulta dos dados associados à conta. Validar autenticação e minimização."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cópia de dados do titular autenticado retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Resposta indica dados filtrados do próprio titular\", function () { pm.expect(data.customerId).to.eql(\"cliente-teste-01\"); pm.expect(data.personalDataFiltered).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LGPD-04 — Solicitar correção de dados",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/correction-requests"
+            },
+            "description": "Rota proposta. Use somente dados fictícios. O contrato deve definir validação de identidade e fluxo de atendimento.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field\": \"nomeExibicao\",\n  \"requestedValue\": \"Cliente QA Atualizado\",\n  \"reason\": \"Correção em ambiente de teste\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Solicitação de correção é recebida com HTTP 202\", function () { pm.expect(pm.response.code).to.eql(202); });",
+                  "pm.response.to.be.json;",
+                  "pm.test(\"Retorna identificador de solicitação\", function () { pm.expect(pm.response.json().requestId).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LGPD-05 — Solicitar exclusão da conta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/deletion-requests"
+            },
+            "description": "Rota proposta. Deve iniciar fluxo controlado, respeitando retenções legais aplicáveis; não apaga dados reais por esta coleção.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Solicitação de teste\",\n  \"correlationId\": \"{{correlationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Solicitação de exclusão é recebida com HTTP 202\", function () { pm.expect(pm.response.code).to.eql(202); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Solicitação não exclui conta automaticamente e é rastreável\", function () { pm.expect(data.requestId).to.be.a(\"string\"); pm.expect(data.message).to.include(\"nenhuma conta real\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LGPD-06 — Revogar consentimentos opcionais",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/consent-revocations"
+            },
+            "description": "Rota proposta. Verificar revogação de consentimentos opcionais e registro auditável da alteração.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consents\": [\n    \"personalizacaoFidelidade\",\n    \"comunicacoesPromocionais\"\n  ],\n  \"correlationId\": \"{{correlationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Revogação retorna HTTP 200\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.response.to.be.json;",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Os consentimentos pedidos constam na revogação\", function () { pm.expect(data.status).to.eql(\"revoked\"); pm.expect(data.revoked).to.include(\"personalizacaoFidelidade\"); pm.expect(data.preferences.personalizacaoFidelidade).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 — Auditoria e relatórios",
+      "description": "Rotas conceituais para rastreabilidade e consolidação.",
+      "item": [
+        {
+          "name": "AUD-01 — Consultar eventos de auditoria",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audit/events?correlationId={{correlationId}}"
+            },
+            "description": "Rota proposta. Acesso deve ser restrito a perfis autorizados; evitar dados pessoais desnecessários nos logs."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cliente comum não pode consultar auditoria: HTTP 403\", function () { pm.expect(pm.response.code).to.eql(403); });",
+                  "pm.response.to.be.json;",
+                  "pm.test(\"Recusa é controlada e não expõe eventos de terceiros\", function () { pm.expect(pm.response.json().error).to.eql(\"forbidden\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUD-02 — Relatório consolidado por unidade",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/head-office?unitId={{unitId}}"
+            },
+            "description": "Rota proposta para relatório da matriz. Validar controle de acesso e consolidação dos dados por unidade."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cliente comum não pode consultar relatório da matriz: HTTP 403\", function () { pm.expect(pm.response.code).to.eql(403); });",
+                  "pm.response.to.be.json;",
+                  "pm.test(\"Recusa é controlada\", function () { pm.expect(pm.response.json().error).to.eql(\"forbidden\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

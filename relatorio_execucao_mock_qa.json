@@ -1,0 +1,555 @@
+{
+  "project": "Raízes do Nordeste — pacote acadêmico de QA",
+  "startedAt": "2026-10-16T12:45:08.084Z",
+  "finishedAt": "2026-10-16T12:45:38.691Z",
+  "executionMode": "local / loopback only",
+  "target": "API mock descartável construída para a atividade; nenhuma aplicação real foi fornecida.",
+  "collection": {
+    "startedAt": "2026-10-16T12:45:08.215Z",
+    "type": "Execução local de scripts Postman por runtime de compatibilidade mínimo",
+    "officialPostmanNewman": false,
+    "target": "API mock local descartável; não é produto implantado",
+    "requestCount": 18,
+    "totalAssertions": 39,
+    "passedAssertions": 39,
+    "failedAssertions": 0,
+    "requestResults": [
+      {
+        "request": "AUTH-01 — Login válido",
+        "group": "01 — Autenticação",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/auth/login",
+        "httpStatus": 200,
+        "durationMs": 43.69,
+        "assertions": [
+          {
+            "name": "Login válido retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Login válido retorna JSON",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Token de acesso está presente",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "AUTH-02 — Login inválido",
+        "group": "01 — Autenticação",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/auth/login",
+        "httpStatus": 401,
+        "durationMs": 3.68,
+        "assertions": [
+          {
+            "name": "Credenciais inválidas retornam HTTP 401",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Resposta não expõe detalhes internos",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Não emite token para login inválido",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "AUTH-03 — Tentativa de SQL Injection no login",
+        "group": "01 — Autenticação",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/auth/login",
+        "httpStatus": 401,
+        "durationMs": 1.87,
+        "assertions": [
+          {
+            "name": "Payload de injeção é recusado",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Resposta não revela erro SQL nem stack trace",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Nenhum token é emitido",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "CAT-01 — Consultar cardápio por unidade",
+        "group": "02 — Cardápio e estoque",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/units/unidade-teste-01/menu",
+        "httpStatus": 200,
+        "durationMs": 1.77,
+        "assertions": [
+          {
+            "name": "Cardápio retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Cardápio identifica unidade e itens",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "CAT-02 — Consultar estoque de produto",
+        "group": "02 — Cardápio e estoque",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/units/unidade-teste-01/stock?productId=produto-teste-01",
+        "httpStatus": 200,
+        "durationMs": 2.5,
+        "assertions": [
+          {
+            "name": "Estoque retorna HTTP 200 para produto de teste",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Disponibilidade é booleana e vinculada à unidade",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "ORD-01 — Criar pedido",
+        "group": "03 — Pedidos",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/orders",
+        "httpStatus": 201,
+        "durationMs": 2.38,
+        "assertions": [
+          {
+            "name": "Criação de pedido retorna HTTP 201",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Pedido possui identificador, unidade e status inicial",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "ORD-02 — Consultar pedido",
+        "group": "03 — Pedidos",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/orders/order-0001",
+        "httpStatus": 200,
+        "durationMs": 2.33,
+        "assertions": [
+          {
+            "name": "Pedido criado anteriormente retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Consulta retorna o identificador solicitado",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "ORD-03 — Criar pedido independente para pagamento negado",
+        "group": "03 — Pedidos",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/orders",
+        "httpStatus": 201,
+        "durationMs": 1.89,
+        "assertions": [
+          {
+            "name": "Pedido de cenário negativo é criado com HTTP 201",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Pedido negativo começa aguardando pagamento",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "PAY-01 — Solicitar pagamento mock aprovado",
+        "group": "04 — Pagamento simulado",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/payments/mock",
+        "httpStatus": 200,
+        "durationMs": 3,
+        "assertions": [
+          {
+            "name": "Pagamento aprovado retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Pagamento aprovado e pedido avança para preparo",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "PAY-02 — Solicitar pagamento mock negado",
+        "group": "04 — Pagamento simulado",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/payments/mock",
+        "httpStatus": 200,
+        "durationMs": 1.48,
+        "assertions": [
+          {
+            "name": "Pagamento negado retorna HTTP 200 com resultado de negócio",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Pagamento permanece negado e pedido não avança para preparo",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-01 — Consultar preferências",
+        "group": "05 — Privacidade e LGPD",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/privacy/preferences",
+        "httpStatus": 200,
+        "durationMs": 1.54,
+        "assertions": [
+          {
+            "name": "Consulta de preferências retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Preferências opcionais têm valores booleanos",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-02 — Atualizar consentimentos opcionais",
+        "group": "05 — Privacidade e LGPD",
+        "method": "PUT",
+        "url": "http://127.0.0.1:3000/api/privacy/preferences",
+        "httpStatus": 200,
+        "durationMs": 1.05,
+        "assertions": [
+          {
+            "name": "Atualização retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Preferências enviadas são persistidas na resposta",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-03 — Solicitar cópia dos dados",
+        "group": "05 — Privacidade e LGPD",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/privacy/data",
+        "httpStatus": 200,
+        "durationMs": 0.69,
+        "assertions": [
+          {
+            "name": "Cópia de dados do titular autenticado retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Resposta indica dados filtrados do próprio titular",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-04 — Solicitar correção de dados",
+        "group": "05 — Privacidade e LGPD",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/privacy/correction-requests",
+        "httpStatus": 202,
+        "durationMs": 1.31,
+        "assertions": [
+          {
+            "name": "Solicitação de correção é recebida com HTTP 202",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Retorna identificador de solicitação",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-05 — Solicitar exclusão da conta",
+        "group": "05 — Privacidade e LGPD",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/privacy/deletion-requests",
+        "httpStatus": 202,
+        "durationMs": 1.17,
+        "assertions": [
+          {
+            "name": "Solicitação de exclusão é recebida com HTTP 202",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Solicitação não exclui conta automaticamente e é rastreável",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "LGPD-06 — Revogar consentimentos opcionais",
+        "group": "05 — Privacidade e LGPD",
+        "method": "POST",
+        "url": "http://127.0.0.1:3000/api/privacy/consent-revocations",
+        "httpStatus": 200,
+        "durationMs": 0.91,
+        "assertions": [
+          {
+            "name": "Revogação retorna HTTP 200",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Os consentimentos pedidos constam na revogação",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "AUD-01 — Consultar eventos de auditoria",
+        "group": "06 — Auditoria e relatórios",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/audit/events?correlationId=qa-correlation-001",
+        "httpStatus": 403,
+        "durationMs": 0.91,
+        "assertions": [
+          {
+            "name": "Cliente comum não pode consultar auditoria: HTTP 403",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Recusa é controlada e não expõe eventos de terceiros",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      },
+      {
+        "request": "AUD-02 — Relatório consolidado por unidade",
+        "group": "06 — Auditoria e relatórios",
+        "method": "GET",
+        "url": "http://127.0.0.1:3000/api/reports/head-office?unitId=unidade-teste-01",
+        "httpStatus": 403,
+        "durationMs": 1.02,
+        "assertions": [
+          {
+            "name": "Cliente comum não pode consultar relatório da matriz: HTTP 403",
+            "status": "PASS",
+            "detail": ""
+          },
+          {
+            "name": "Recusa é controlada",
+            "status": "PASS",
+            "detail": ""
+          }
+        ],
+        "status": "PASS",
+        "transportError": false
+      }
+    ],
+    "status": "PASS"
+  },
+  "load": {
+    "type": "Teste de carga complementar contra mock local (não JMeter)",
+    "users": 500,
+    "durationSeconds": 30.44,
+    "requestCount": 15000,
+    "successfulRequests": 15000,
+    "errors": 0,
+    "errorRatePercent": 0,
+    "requestsPerSecond": 492.73,
+    "latencyMs": {
+      "p50": 0.82,
+      "p90": 4.81,
+      "p95": 10.39,
+      "p99": 226.62,
+      "max": 248.75
+    },
+    "targetP95Under2000ms": true,
+    "matchesCT08FullProfile": false,
+    "limitation": "30 segundos de duração prática neste relatório, inferior aos 10 minutos previstos no CT08; ambiente é apenas um mock local e não substitui JMeter nem teste do sistema real."
+  },
+  "security": {
+    "type": "Verificações negativas complementares contra mock local (não OWASP ZAP)",
+    "checks": [
+      {
+        "name": "SEC-01 — Preferências sem autenticação",
+        "status": "PASS",
+        "httpStatus": 401,
+        "expectedStatus": 401,
+        "durationMs": 2.9,
+        "detail": ""
+      },
+      {
+        "name": "SEC-02 — Pedido sem autenticação",
+        "status": "PASS",
+        "httpStatus": 401,
+        "expectedStatus": 401,
+        "durationMs": 0.71,
+        "detail": ""
+      },
+      {
+        "name": "SEC-03 — SQL injection rejeitada",
+        "status": "PASS",
+        "httpStatus": 401,
+        "expectedStatus": 401,
+        "durationMs": 1.77,
+        "detail": ""
+      },
+      {
+        "name": "SEC-04 — Cliente não acessa auditoria",
+        "status": "PASS",
+        "httpStatus": 403,
+        "expectedStatus": 403,
+        "durationMs": 0.55,
+        "detail": ""
+      },
+      {
+        "name": "SEC-05 — Cliente não acessa relatório da matriz",
+        "status": "PASS",
+        "httpStatus": 403,
+        "expectedStatus": 403,
+        "durationMs": 0.37,
+        "detail": ""
+      },
+      {
+        "name": "SEC-06 — JSON inválido retorna erro controlado",
+        "status": "PASS",
+        "httpStatus": 400,
+        "expectedStatus": 400,
+        "durationMs": 0.55,
+        "detail": ""
+      }
+    ],
+    "passed": 6,
+    "failed": 0,
+    "officialOwaspZap": false,
+    "conclusion": "Os checks indicam apenas o comportamento observado no mock de referência; não constituem varredura OWASP ZAP nem atestado de segurança do produto real."
+  },
+  "gherkin": {
+    "type": "Execução mapeada dos cinco cenários Gherkin em código de referência; não foi usado Cucumber oficial",
+    "scenarios": [
+      {
+        "id": "CT01",
+        "name": "Login válido no APP",
+        "status": "PASS",
+        "details": "HTTP 200; token presente no mock."
+      },
+      {
+        "id": "CT03",
+        "name": "Pedido concluído com pagamento aprovado",
+        "status": "PASS",
+        "details": "Pedido HTTP 201; pagamento HTTP 200; status em preparo; mock."
+      },
+      {
+        "id": "CT04",
+        "name": "Pagamento negado não confirma o pedido",
+        "status": "PASS",
+        "details": "Pedido HTTP 201; pagamento HTTP 200; status final pagamento não aprovado; mock."
+      },
+      {
+        "id": "CT08",
+        "name": "Atendimento a 500 usuários simultâneos",
+        "status": "PARCIAL",
+        "details": "Mock: 500 clientes simulados, 30.44s, p95 10.39ms, erros 0%. Não atende à duração completa de 10 minutos; não é JMeter nem teste do produto."
+      },
+      {
+        "id": "CT10",
+        "name": "Tentativa de SQL Injection no login",
+        "status": "PASS",
+        "details": "HTTP 401; token ausente; sem stack trace/erro SQL no mock."
+      }
+    ],
+    "passed": 4,
+    "partial": 1,
+    "failed": 0,
+    "limitation": "As ações foram implementadas em testes de referência contra a API mock local. Não prova execução do sistema real; CT08 permanece parcial por duração e ferramenta."
+  },
+  "overallStatus": "PASS_COM_LIMITAÇÕES",
+  "importantLimitations": [
+    "Não é uma execução do Postman/Newman oficial: os scripts pm.test foram processados por um runtime de compatibilidade local mínimo.",
+    "O Gherkin foi mapeado a verificações automatizadas locais; não foi usado runner Cucumber oficial.",
+    "O ensaio de carga foi um smoke test abreviado de 30 segundos com 500 clientes contra o mock, inferior aos 10 minutos previstos no CT08; JMeter não foi executado.",
+    "Os checks de segurança foram verificações negativas contra o mock; OWASP ZAP não foi executado.",
+    "Nenhum resultado neste relatório valida uma implementação real da Raízes do Nordeste ou pode aprovar uma release real."
+  ]
+}
